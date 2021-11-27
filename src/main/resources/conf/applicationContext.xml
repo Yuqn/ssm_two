@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--    获取properties文件，从文件根目录开始找-->
+    <context:property-placeholder location="classpath:conf/jdbc.properties"/>
+    <!--    druid配置，声明数据源，通过阿里巴巴创建的类进行创建一个MyDatasource对象-->
+    <bean id="myDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.user}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="maxActive" value="${jdbc.maxActive}" />
+    </bean>
+    <!--    声明sqlSessionFactor对象-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--        set注入，把数据源MyDatasource赋值给sqlSessionFactory中的dataSource属性，让spring去生成sqlSessionFactory-->
+        <property name="dataSource" ref="myDataSource"/>
+        <!--        set注入，把mybatis文件路径赋值给sqlSessionFactory中的configLocation属性，让spring去生成sqlSessionFactory-->
+        <property name="configLocation" value="classpath:conf/mybatis.xml"/>
+    </bean>
+    <!--    生成每个接口的代理对象，类似getMapper（）方法，默认对象名称为接口名称首字母小写，所以不用加id-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" >
+        <!--        set注入，把sqlSessionFactory赋值给sqlSessionFactoryBeanName属性-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <!--        set注入，把接口路径赋值给basePackage属性-->
+        <property name="basePackage" value="com.yuqn.dao" />
+    </bean>
+
+    <!--    创建service对象，id为每一个service下接口名称，有多个接口就要创建多个对象-->
+    <bean id="buyService" class="com.yuqn.service.impl.StudentServiceImpl">
+        <!--    将studentDao赋值给studentDao属性，第一个（ref属性）studentDao是第三步生成的代理对象，第二个（name属性）studentDao是service实现类里面的一个属性-->
+        <property name="studentDao" ref="studentDao" />
+    </bean>
+    <bean id="buyServicea" class="com.yuqn.controller.StudentController">
+        <!--    将studentDao赋值给studentDao属性，第一个（ref属性）studentDao是第三步生成的代理对象，第二个（name属性）studentDao是service实现类里面的一个属性-->
+        <property name="studentService" ref="buyService" />
+    </bean>
+<!--    声明service注解-->
+<!--    <context:component-scan base-package="com.yuqn.service"/>-->
+
+</beans>

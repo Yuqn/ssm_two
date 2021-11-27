@@ -1,0 +1,5 @@
+com\yuqn\dao\StudentDao.class
+com\yuqn\entity\Student.class
+com\yuqn\service\impl\StudentServiceImpl.class
+com\yuqn\controller\StudentController.class
+com\yuqn\service\StudentService.class
